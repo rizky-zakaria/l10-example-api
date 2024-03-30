@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 
 class UserController extends Controller
 {
@@ -30,7 +31,28 @@ class UserController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $this->validate($request, [
+            'name' => 'required|string',
+            'email' => 'required',
+            'password' => 'required|string'
+        ]);
+
+        try {
+            User::create([
+                'name' => $request->name,
+                'email' => $request->email,
+                'password' => Hash::make($request->password),
+            ]);
+            return response()->json([
+                'status' => true,
+                'message' => 'Successfuly'
+            ]);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Error'
+            ]);
+        }
     }
 
     /**
@@ -54,7 +76,30 @@ class UserController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //
+        $this->validate($request, [
+            'name' => 'required|string',
+            'email' => 'required',
+            'password' => 'required|string'
+        ]);
+
+        try {
+            $data = User::find($id);
+            $data->name = $request->name;
+            $data->email = $request->email;
+            if ($request->password != '') {
+                $data->password = Hash::make($request->password);
+            }
+            $data->update();
+            return response()->json([
+                'status' => true,
+                'message' => 'Successfuly'
+            ]);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Error'
+            ]);
+        }
     }
 
     /**
@@ -62,6 +107,18 @@ class UserController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        try {
+            $data = User::find($id);
+            $data->delete();
+            return response()->json([
+                'status' => true,
+                'message' => 'Successfuly'
+            ]);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Error'
+            ]);
+        }
     }
 }
